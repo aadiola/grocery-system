@@ -1,0 +1,1 @@
+Step 1: run `docker compose up`s
