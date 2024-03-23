@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  postgres:
+  pgdb:
     image: postgres:latest
     restart: always
     environment:
@@ -12,6 +12,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  spring-boot-app:
+    build:
+      context: ./be
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    depends_on:
+      - pgdb
 volumes:
   postgres_data:

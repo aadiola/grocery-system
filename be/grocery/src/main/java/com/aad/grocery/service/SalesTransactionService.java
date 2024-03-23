@@ -94,7 +94,7 @@ public class SalesTransactionService {
 			
 			ProductQuantitySales pr = new ProductQuantitySales();
 			pr.setPricePerUnit(prdQtySale.getPricePerUnit());
-			pr.setProductId(prdQtySale.getPricePerUnit());
+			pr.setProductId(prdQtySale.getProductId());
 			pr.setQuantity(prdQtySale.getQuantity());
 			pr.setTransactionId(salesTransaction);
 
