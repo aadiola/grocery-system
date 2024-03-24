@@ -92,6 +92,8 @@ public class SalesTransactionService {
 				throw new InvalidTransactionDataException(String.format("Requested quantity for Product %d is greater than available.", prdQtySale.getProductId()), 1);
 			}
 			
+			retVal.get().setAvailableQuantity(retVal.get().getAvailableQuantity() - prdQtySale.getQuantity());
+			
 			ProductQuantitySales pr = new ProductQuantitySales();
 			pr.setPricePerUnit(prdQtySale.getPricePerUnit());
 			pr.setProductId(prdQtySale.getProductId());
@@ -163,6 +165,8 @@ public class SalesTransactionService {
 		for(ProductQuantitySales oldSale : oldProductQuantitySales) {
 			oldSale.setArchived(true);
 			oldSale.setTransactionId(null);
+			Optional<ProductInventory> productVal = Optional.ofNullable(productInventoryRepository.findByProductId(oldSale.getProductId()));
+			productVal.get().setAvailableQuantity(productVal.get().getAvailableQuantity() + oldSale.getQuantity());
 		}
 		
 		
@@ -191,6 +195,8 @@ public class SalesTransactionService {
 					throw new InvalidTransactionDataException(String.format("Requested quantity for Product %d is greater than available.", prdQtySale.getProductId()), 1);
 				}
 				
+				productVal.get().setAvailableQuantity(productVal.get().getAvailableQuantity() - prdQtySale.getQuantity());
+				
 				ProductQuantitySales pr = new ProductQuantitySales();
 				pr.setPricePerUnit(prdQtySale.getPricePerUnit());
 				pr.setProductId(prdQtySale.getPricePerUnit());
@@ -204,10 +210,12 @@ public class SalesTransactionService {
 				if(pr.isEmpty()) {
 					throw new InvalidTransactionDataException("Invalid Product Sales ID");
 				}
+				Optional<ProductInventory> productVal = Optional.ofNullable(productInventoryRepository.findByProductIdAndArchivedFalse(prdQtySale.getProductId()));
+				productVal.get().setAvailableQuantity(productVal.get().getAvailableQuantity() - prdQtySale.getQuantity());
 				
 				ProductQuantitySales prUpdated = pr.get();
 				prUpdated.setPricePerUnit(prdQtySale.getPricePerUnit());
-				prUpdated.setProductId(prdQtySale.getPricePerUnit());
+				prUpdated.setProductId(prdQtySale.getProductId());
 				prUpdated.setQuantity(prdQtySale.getQuantity());
 				prUpdated.setTransactionId(salesTransaction);
 				prUpdated.setArchived(false);
@@ -239,6 +247,8 @@ public class SalesTransactionService {
 		for(ProductQuantitySales oldSale : oldProductQuantitySales) {
 			oldSale.setArchived(true);
 			oldSale.setTransactionId(null);
+			Optional<ProductInventory> productVal = Optional.ofNullable(productInventoryRepository.findByProductId(oldSale.getProductId()));
+			productVal.get().setAvailableQuantity(productVal.get().getAvailableQuantity() + oldSale.getQuantity());
 		}
 		
 		retVal.get().setArchived(true);

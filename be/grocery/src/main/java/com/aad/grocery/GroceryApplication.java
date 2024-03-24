@@ -32,8 +32,12 @@ public class GroceryApplication {
 			roles.add(adminRole);
 
 			ApplicationUser admin = new ApplicationUser(1, "admin", passwordEncode.encode("password"), roles);
+			ApplicationUser admin2 = new ApplicationUser(2, "hello", passwordEncode.encode("world"), roles);
+			ApplicationUser admin3 = new ApplicationUser(3, "kim", passwordEncode.encode("kim"), roles);
 
 			userRepository.save(admin);
+			userRepository.save(admin2);
+			userRepository.save(admin3);
 		};
 	}
 
