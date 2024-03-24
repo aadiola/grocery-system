@@ -26,7 +26,6 @@ const state = {
 	async setTransactions({ commit }, transactions) {
       try{
         const resp = await api.get('/sales/')
-		console.log(resp)
         const transactions = resp.data
         commit('SET_TRANSACTIONS', transactions);
       } catch (e) {
@@ -37,6 +36,7 @@ const state = {
 	async addTransaction({ commit, dispatch }, transaction) {
       try{
         const resp = await api.post('/sales/', {...transaction})
+        dispatch('setTransactions')
       } catch (e) {
         console.log(e)
       }
@@ -54,6 +54,7 @@ const state = {
 	},
 	async updateTransaction({ commit }, updatedTransaction) {
       try{
+        console.log(updatedTransaction)
         const resp = await api.put('/sales/', {...updatedTransaction})
       } catch (e) {
         console.log(e)

@@ -1,5 +1,5 @@
 <template>
-<div class="q-pa-md flex column">
+<div class="q-pa-md flex q-gutter-md">
 	<q-dialog v-model="deleteDialogVisible">
 		<q-card>
 		<q-card-section class="text-h6">Confirm Deletion</q-card-section>
@@ -23,10 +23,15 @@
 		</q-card-actions>
 		</q-card>
 	</q-dialog>
-	<TransactionsSummaryComponent
-	:transaction="selectedRow"
-	/>
-	<q-table
+	<div class="column">
+		<TransactionsSummaryComponent
+			v-if="Object.keys(selectedRow).length != 0"
+			:transaction="selectedRow"
+			@deleted="onDelete"
+			@edit="onEdit"
+			
+		/>
+		<q-table
 		title="Transactions"
 		:rows="getTransactionsWithTotal"
 		:columns="columns"
@@ -34,13 +39,29 @@
 		:pagination="pagination"
 		row-key="transactionId"
 		@row-click="onRowClick"
+		class=""
+		style="width: 45vw;"
 	>
-	<template v-slot:body-cell="props">
-        <q-td :props="props" :class="{ 'clicked': props.row.transactionId === selectedRow.transactionId }">
-          {{ props.value }}
-        </q-td>
-      </template>
-</q-table>
+			<template v-slot:body-cell="props">
+				<q-td :props="props" :class="{ 'clicked': props.row.transactionId === selectedRow.transactionId }">
+				{{ props.value }}
+				</q-td>
+			</template>
+		
+		</q-table>
+	</div>
+	
+	<div class="column" :style="'width: 40vw;'">
+		<TransactionsAddEditComponent
+		:transactionId="editRowTransactionId"
+		:key="addEditComponentKey"
+		@edit="onEdit"
+			@added="onAdded"
+			@edited="onAdded"
+		/>
+		
+	</div>
+	
 	</div>
 
 </template>
@@ -52,6 +73,7 @@ import moment from 'moment';
 import { mapGetters, mapActions } from 'vuex';
 
 import TransactionsSummaryComponent from 'src/components/TransactionsSummaryComponent.vue'
+import TransactionsAddEditComponent from 'src/components/TransactionsAddEditComponent.vue'
 
 const columns = [
 	{ name: 'transactionId', label: 'ID', field: 'transactionId', align:'left', style: 'width: 5%', headerStyle: 'width: 5%', sortable: true },
@@ -66,7 +88,8 @@ const visibleColumns = ['transactionId', 'dateOfTransaction', 'amountTendered', 
 export default {
 
 	components: {
-		TransactionsSummaryComponent
+		TransactionsSummaryComponent,
+		TransactionsAddEditComponent
 	},
 
 	data () {
@@ -79,11 +102,12 @@ export default {
 			errorDialogVisible: false,
 			pagination: {
 				rowsPerPage: 10,
-				sortBy: 'productId',
-				descending: false,
+				sortBy: 'transactionId',
+				descending: true,
 			},
 			selectedRow: {},
-			selectedRowId: null
+			editRowTransactionId: null,
+			addEditComponentKey: 0
 		}
 	},
 
@@ -93,7 +117,7 @@ export default {
 		getTransactionsWithTotal () {
 		return this.getAllTransactions.map(transaction => {
 			const total = transaction.productToQtySold.reduce(
-				(acc, cur) => acc + (cur.pricePerUnit * cur.quantity),
+				(acc, cur) => acc + ((cur.pricePerUnit * cur.quantity) - transaction.discount),
 				0
 			)
 			return {...transaction, total: total}
@@ -104,6 +128,7 @@ export default {
 	methods: {
 
 		...mapActions('inventory', ['removeProduct']),
+		...mapActions('transactions', ['setTransactions']),
 
 		deleteRow(row) {
 			this.deleteDialogVisible = true
@@ -117,16 +142,39 @@ export default {
 			if(res !== 1) {
 				this.errorDialogVisible = true
 			}
-		},
-
-		editRow(row){
-			this.$router.push({name: 'editInventory', query: {productId: row.productId}})
+			
 		},
 
 		onRowClick(event, row, index){
 			console.log(row)
 			this.selectedRow = row
+		},
+		async onDelete() {
+			await this.setTransactions()
+			this.setupLatestTransaction()
+		},
+
+		onEdit () {
+			this.editRowTransactionId = this.selectedRow.transactionId
+			this.addEditComponentKey += 1 
+		},
+
+		onAdded () {
+			this.setupLatestTransaction()
+		},
+
+		async setupLatestTransaction () {
+			await this.setTransactions()
+			this.addEditComponentKey += 1 
+			this.editRowTransactionId = null
+			this.selectedRow = this.getTransactionsWithTotal[this.getTransactionsWithTotal.length-1] || {}
 		}
+	},
+
+	async created () {
+		await this.setTransactions()
+		this.setupLatestTransaction()
+		
 	}
 }
 

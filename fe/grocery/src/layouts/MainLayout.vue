@@ -58,7 +58,7 @@ export default {
         console.error('Logout failed:', error);
         // Handle logout error (display error message, etc.)
       }
-    },
+    }
   }
 }
 </script>

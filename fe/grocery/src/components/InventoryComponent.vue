@@ -1,6 +1,17 @@
 <template>
  <div class="q-pa-md flex column">
-	<q-btn color="positive" label="Add Product" class="q-my-md row q-ml-auto" @click="this.$router.push({name: 'addInventory'})"/>
+	<div class="row q-my-md">
+		<div class="q-ma-md">
+			<q-input filled v-model="search" label="Search" bg-color="white"  style="width: 25vw;">
+			<template v-slot:prepend>
+				<q-icon name="search" />
+			</template>
+		</q-input>
+		</div>
+		
+		<q-btn color="positive" label="Add Product" class="q-my-md row q-ml-auto" @click="this.$router.push({name: 'addInventory'})"/>
+	</div>
+	
 	<q-dialog v-model="deleteDialogVisible">
       <q-card>
         <q-card-section class="text-h6">Confirm Deletion</q-card-section>
@@ -26,7 +37,7 @@
     </q-dialog>
     <q-table
       title="Inventory"
-      :rows="getAllProducts"
+      :rows="filteredProducts"
       :columns="columns"
 	  :visible-columns="visibleColumns"
 	  :pagination="pagination"
@@ -77,13 +88,23 @@ export default {
 				rowsPerPage: 10,
 				sortBy: 'productId',
 				descending: false,
-			}
+			},
+			search: ''
 		}
 	},
 
 	computed: {
-		...mapGetters('inventory', ['getAllProducts'])
+		...mapGetters('inventory', ['getAllProducts']),
+
+
+		filteredProducts () {
+			if(!this.search || this.search.trim().length === 0) {
+				return this.getAllProducts
+			}
+			return this.getAllProducts.filter(product => product.productName.toLowerCase().includes(this.search.toLowerCase()))
+		}
 	},
+	
 
 	methods: {
 

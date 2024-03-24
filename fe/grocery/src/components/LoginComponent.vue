@@ -1,7 +1,7 @@
 <template>
   <q-card class="my-card login-card ">
       <q-card-section class="bg-white text-primary dark text-center ">
-        <div class="text-h6">Kim's Grocery Store</div>
+        <div class="text-h6">MC Alba Grocery Store</div>
       </q-card-section>
       <q-separator />
       <q-card-section>

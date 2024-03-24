@@ -1,6 +1,6 @@
 <template>
 	<div class="bg-primary q-pa-md">
-		<div class="q-my-xl">
+		<div>
 			<TransactionsComponent />
 		</div>
 		
@@ -19,12 +19,14 @@ export default {
 	},
 
 	methods: {
-		...mapActions('transactions', ['setTransactions'])
+		...mapActions('transactions', ['setTransactions']),
+		...mapActions('inventory', ['setProducts'])
 	},
 
 	async created () {
 		// console.log(store)
 		await this.setTransactions();
+		await this.setProducts()
 		// next()
 	},
 }
